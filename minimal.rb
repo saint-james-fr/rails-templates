@@ -10,8 +10,9 @@ inject_into_file "Gemfile", before: "group :development, :test do" do
   RUBY
 end
 
-inject_into_file "Gemfile", after: "gem "web-console"" do
+inject_into_file "Gemfile", after: 'gem "web-console"' do
   <<~RUBY
+    
     gem "hotwire-livereload"
   RUBY
 end
