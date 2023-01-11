@@ -10,10 +10,8 @@ inject_into_file "Gemfile", before: "group :development, :test do" do
   RUBY
 end
 
-inject_into_file "Gemfile", after: "group :development do" do
+inject_into_file "Gemfile", after: "gem "web-console"" do
   <<~RUBY
-    
-    # Allow live reload through Hotwire
     gem "hotwire-livereload"
   RUBY
 end
