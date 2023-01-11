@@ -10,6 +10,12 @@ inject_into_file "Gemfile", before: "group :development, :test do" do
   RUBY
 end
 
+inject_into_file "Gemfile", after: "group :development do" do
+  <<~RUBY
+    gem "hotwire-livereload"
+  RUBY
+end
+
 inject_into_file "Gemfile", after: 'gem "debug", platforms: %i[ mri mingw x64_mingw ]' do
 <<-RUBY
 
@@ -67,7 +73,7 @@ environment generators
 after_bundle do
   # Generators: db + simple form + pages controller
   ########################################
-  rails_command "db:drop db:create db:migrate"
+  rails_command "db:drop db:create db:migrate livereload:install"
   generate("simple_form:install", "--bootstrap")
   generate(:controller, "pages", "home", "--skip-routes", "--no-test-framework")
 
