@@ -12,6 +12,8 @@ end
 
 inject_into_file "Gemfile", after: "group :development do" do
   <<~RUBY
+    
+    # Allow live reload through Hotwire
     gem "hotwire-livereload"
   RUBY
 end
