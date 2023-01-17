@@ -53,14 +53,14 @@ def layout
   ########################################
   file "app/views/shared/_flashes.html.erb", <<~HTML
   <% if notice %>
-    <div class="alert alert-info alert-dismissible fade show m-1" role="alert">
+    <div class="alert py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" role="alert">
       <%= notice %>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
       </button>
     </div>
   <% end %>
   <% if alert %>
-    <div class="alert alert-warning alert-dismissible fade show m-1" role="alert">
+    <div class="alert py-2 px-3 bg-red-50 mb-5 text-red-500 font-medium rounded-lg inline-block" role="alert">
       <%= alert %>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
       </button>
@@ -71,7 +71,7 @@ def layout
   run "curl -L https://raw.githubusercontent.com/lewagon/awesome-navbars/master/templates/_navbar_wagon.html.erb > app/views/shared/_navbar.html.erb"
 end
 
-def git
+def git_init
 
   # Gitignore
   ########################################
@@ -425,5 +425,5 @@ after_bundle do
 
   vite
   tailwind_for_vite
-  git
+  git_init
 end
