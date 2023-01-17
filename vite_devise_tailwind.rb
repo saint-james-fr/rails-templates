@@ -19,15 +19,13 @@ inject_into_file "Gemfile", after: 'gem "debug", platforms: %i[ mri mingw x64_mi
 RUBY
 end
 
-gsub_file("Gemfile", '# gem "sassc-rails"', 'gem "sassc-rails"')
-
 # Assets
 ########################################
-run "rm -rf app/assets/stylesheets"
+puts "ASSETS"
+run "rm -rf app/assets/stylesheets/*"
 run "rm -rf vendor"
-run "curl -L https://github.com/lewagon/rails-stylesheets/archive/master.zip > stylesheets.zip"
-run "unzip stylesheets.zip -d app/assets && rm -f stylesheets.zip && rm -f app/assets/rails-stylesheets-master/README.md"
-run "mv app/assets/rails-stylesheets-master app/assets/stylesheets"
+run "curl -L https://github.com/saint-james-fr/rails-init-styles/raw/master/components.zip > components.zip"
+run "unzip components.zip -d app/assets/stylesheets && rm -f components.zip"
 
 inject_into_file "config/initializers/assets.rb", before: "# Precompile additional assets." do
   <<~RUBY
@@ -63,16 +61,13 @@ file "app/views/shared/_flashes.html.erb", <<~HTML
   <% end %>
 HTML
 
-inject_into_file "app/views/layouts/application.html.erb", after: "<body>" do
-  <<~HTML
-    <%= render "shared/flashes" %>
-  HTML
-end
+run "curl -L https://raw.githubusercontent.com/lewagon/awesome-navbars/master/templates/_navbar_wagon.html.erb > app/views/shared/_navbar.html.erb"
+
 
 # README
 ########################################
 markdown_file_content = <<~MARKDOWN
-  Rails app generated with [lewagon/rails-templates](https://github.com/lewagon/rails-templates), created by the [Le Wagon coding bootcamp](https://www.lewagon.com) team.
+  This is a brand new Rails app.
 MARKDOWN
 file "README.md", markdown_file_content, force: true
 
@@ -188,11 +183,6 @@ after_bundle do
   ########################################
   run "curl -L https://raw.githubusercontent.com/lewagon/rails-templates/master/.rubocop.yml > .rubocop.yml"
 
-  # Git
-  ########################################
-  git :init
-  git add: "."
-  git commit: "-m 'Initial commit with devise'"
 
   #Adding Vite
   ########################################
@@ -257,10 +247,11 @@ const defaultTheme = require("tailwindcss/defaultTheme")
 
 module.exports = {
   content: [
+    "./public/*.html",
     "./app/helpers/**/*.rb",
     "./app/assets/stylesheets/**/*.css",
     "./app/views/**/*.{html,html.erb,erb}",
-    "./app/javascript/components/**/*.js",
+    "./app/javascript/**/*.js",
   ],
   theme: {
     fontFamily: {
@@ -288,6 +279,7 @@ module.exports = {
   # Add SimpleForm Config to Tailwind to Gemfile
   inject_into_file "Gemfile", before: "group :development, :test do" do
     <<~RUBY
+      gem "tailwindcss-rails"
       gem "simple_form-tailwind"
 
     RUBY
@@ -295,6 +287,8 @@ module.exports = {
 
   # run bundler
   run 'bundle'
+  run 'rails tailwindcss:install'
+  run 'rails g simple_form:tailwind:install'
 
    # Add Tailwind to application.css
   file = 'app/assets/stylesheets/application.css'
@@ -304,6 +298,8 @@ module.exports = {
 @import "tailwindcss/components";
 
 @import "tailwindcss/utilities";
+
+@import "components/index";
     '
   end
 
@@ -343,6 +339,7 @@ module.exports = {
 
   <body>
     <%= render "shared/flashes" %>
+    <%= render "shared/navbar" %>
     <%= yield %>
   </body>
 </html>
@@ -386,7 +383,7 @@ file "app/views/pages/home.html.erb", <<~HTML
 </div>
 HTML
 
-# Add Turbo & Stimus references into Entrypoint
+# Add Turbo & Stimus references on Entrypoint
 
   inject_into_file "app/javascript/entrypoints/application.js", before: "// Example: Load Rails libraries in Vite." do
     <<~JS
@@ -394,4 +391,20 @@ HTML
       import "../controllers"
     JS
   end
+
+
+  # Clean Tailwind CSS
+  run 'rm -f app/assets/builds/tailwind.css'
+  gsub_file('app/assets/config/manifest.js', '//= link_tree ../builds', '')
+  run 'rm -f app/assets/stylesheets/application.tailwind.css'
+  run 'rm -f config/tailwind.config.js'
+
+
+
+# Git
+########################################
+  git :init
+  git add: "."
+  git commit: "-m 'Initial commit with devise'"
+
 end

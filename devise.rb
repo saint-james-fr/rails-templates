@@ -47,14 +47,14 @@ gsub_file(
 ########################################
 file "app/views/shared/_flashes.html.erb", <<~HTML
   <% if notice %>
-    <div class="alert alert-info alert-dismissible fade show m-1" role="alert">
+    <div class="alert py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" role="alert">
       <%= notice %>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
       </button>
     </div>
   <% end %>
   <% if alert %>
-    <div class="alert alert-warning alert-dismissible fade show m-1" role="alert">
+    <div class="alert py-2 px-3 bg-red-50 mb-5 text-red-500 font-medium rounded-lg inline-block" role="alert">
       <%= alert %>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
       </button>
@@ -74,7 +74,7 @@ end
 # README
 ########################################
 markdown_file_content = <<~MARKDOWN
-  Rails app generated with [lewagon/rails-templates](https://github.com/lewagon/rails-templates), created by the [Le Wagon coding bootcamp](https://www.lewagon.com) team.
+  This is a brand new Rails app.
 MARKDOWN
 file "README.md", markdown_file_content, force: true
 
