@@ -1,50 +1,57 @@
+## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
+## ! ## !  ## !   FUNCTIONS ## !  ## !  ## ! ## ! ##
+## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
 
-run "if uname | grep -q 'Darwin'; then pgrep spring | xargs kill -9; fi"
+def first_gems
 
-# Gemfile
-########################################
-inject_into_file "Gemfile", before: "group :development, :test do" do
-  <<~RUBY
-    gem "devise"
-    gem "autoprefixer-rails"
-    gem "font-awesome-sass", "~> 6.1"
-    gem "simple_form", github: "heartcombo/simple_form"
+  # Gemfile
+  ########################################
+  inject_into_file "Gemfile", before: "group :development, :test do" do
+    <<~RUBY
+      gem "devise"
+      gem "autoprefixer-rails"
+      gem "font-awesome-sass", "~> 6.1"
+      gem "simple_form", github: "heartcombo/simple_form"
+    RUBY
+  end
+
+  inject_into_file "Gemfile", after: 'gem "debug", platforms: %i[ mri mingw x64_mingw ]' do
+  <<-RUBY
+
+    gem "dotenv-rails"
   RUBY
+  end
 end
 
-inject_into_file "Gemfile", after: 'gem "debug", platforms: %i[ mri mingw x64_mingw ]' do
-<<-RUBY
+def assets
+  # Assets
+  ########################################
 
-  gem "dotenv-rails"
-RUBY
-end
-
-# Assets
-########################################
-puts "ASSETS"
-run "rm -rf app/assets/stylesheets/*"
-run "rm -rf vendor"
-run "curl -L https://github.com/saint-james-fr/rails-init-styles/raw/master/components.zip > components.zip"
-run "unzip components.zip -d app/assets/stylesheets && rm -f components.zip"
-
-inject_into_file "config/initializers/assets.rb", before: "# Precompile additional assets." do
-  <<~RUBY
+  inject_into_file "config/initializers/assets.rb", before: "# Precompile additional assets." do
+    <<~RUBY
     Rails.application.config.assets.paths << Rails.root.join("node_modules")
-  RUBY
+    RUBY
+  end
 end
 
-# Layout
-########################################
+def layout
 
-gsub_file(
-  "app/views/layouts/application.html.erb",
-  '<meta name="viewport" content="width=device-width,initial-scale=1">',
-  '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">'
-)
+  # Layout
+  ########################################
+  gsub_file(
+    "app/views/layouts/application.html.erb",
+    '<meta name="viewport" content="width=device-width,initial-scale=1">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">'
+  )
 
-# Flashes
-########################################
-file "app/views/shared/_flashes.html.erb", <<~HTML
+  run "rm -rf app/assets/stylesheets/*"
+  run "rm -rf vendor"
+  run "curl -L https://github.com/saint-james-fr/rails-init-styles/raw/master/components.zip > components.zip"
+  run "unzip components.zip -d app/assets/stylesheets && rm -f components.zip"
+
+  # Flashes
+  ########################################
+  file "app/views/shared/_flashes.html.erb", <<~HTML
   <% if notice %>
     <div class="alert alert-info alert-dismissible fade show m-1" role="alert">
       <%= notice %>
@@ -59,43 +66,12 @@ file "app/views/shared/_flashes.html.erb", <<~HTML
       </button>
     </div>
   <% end %>
-HTML
+  HTML
 
-run "curl -L https://raw.githubusercontent.com/lewagon/awesome-navbars/master/templates/_navbar_wagon.html.erb > app/views/shared/_navbar.html.erb"
+  run "curl -L https://raw.githubusercontent.com/lewagon/awesome-navbars/master/templates/_navbar_wagon.html.erb > app/views/shared/_navbar.html.erb"
+end
 
-
-# README
-########################################
-markdown_file_content = <<~MARKDOWN
-  This is a brand new Rails app.
-MARKDOWN
-file "README.md", markdown_file_content, force: true
-
-# Generators
-########################################
-generators = <<~RUBY
-  config.generators do |generate|
-    generate.assets false
-    generate.helper false
-    generate.test_framework :test_unit, fixture: false
-  end
-RUBY
-
-environment generators
-
-########################################
-# After bundle
-########################################
-after_bundle do
-  # Generators: db + simple form + pages controller
-  ########################################
-  rails_command "db:drop db:create db:migrate"
-  generate("simple_form:install")
-  generate(:controller, "pages", "home", "--skip-routes", "--no-test-framework")
-
-  # Routes
-  ########################################
-  route 'root to: "pages#home"'
+def git
 
   # Gitignore
   ########################################
@@ -107,8 +83,22 @@ after_bundle do
     .DS_Store
   TXT
 
-  # Devise install + user
+  # Git
   ########################################
+  git :init
+  git add: "."
+  git commit: "-m 'Initial commit with devise'"
+
+  # README
+  ###### ##################################
+  markdown_file_content = <<~MARKDOWN
+  This is a brand new Rails app.
+  MARKDOWN
+  file "README.md", markdown_file_content, force: true
+end
+
+def devise
+
   generate("devise:install")
   generate("devise", "User")
 
@@ -158,87 +148,14 @@ after_bundle do
       end
     end
   RUBY
+end
 
-  # Environments
-  ########################################
-  environment 'config.action_mailer.default_url_options = { host: "http://localhost:3000" }', env: "development"
-  environment 'config.action_mailer.default_url_options = { host: "http://TODO_PUT_YOUR_DOMAIN_HERE" }', env: "production"
-
-  # Yarn
-  ########################################
-  # run "yarn add bootstrap @popperjs/core"
-  # append_file "app/javascript/application.js", <<~JS
-  #  import "bootstrap"
-  # JS
-
-  # Heroku
-  ########################################
-  run "bundle lock --add-platform x86_64-linux"
-
-  # Dotenv
-  ########################################
-  run "touch '.env'"
-
-  # Rubocop
-  ########################################
-  run "curl -L https://raw.githubusercontent.com/lewagon/rails-templates/master/.rubocop.yml > .rubocop.yml"
-
-
-  #Adding Vite
-  ########################################
-
-
-  # Add Vite to Gemfile
-  inject_into_file "Gemfile", before: 'gem "jsbundling-rails' do
-    <<~RUBY
-      gem "vite_rails"
-      gem "vite_ruby"
-    RUBY
-  end
-
-  # Remove ESBuild with yarn
-  run "yarn remove esbuild"
-
-  # Remove Build script from package json
-  gsub_file("package.json", '"build": "esbuild app/javascript/*.* --bundle --sourcemap --outdir=app/assets/builds --public-path=assets"', '')
-  # Remove JsBundlingRails Gem
-  gsub_file('Gemfile', 'gem "jsbundling-rails"', '')
-  gsub_file('Gemfile', '# Bundle and transpile JavaScript [https://github.com/rails/jsbundling-rails]', '')
-
-  # run bundler
-  run 'bundle'
-  # run vite install
-  run 'bundle exec vite install'
-
-  # Add Tailwind and other dependencies/plugins
+def tailwind_for_vite
   run 'yarn add tailwindcss @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio @tailwindcss/forms @tailwindcss/line-clamp autoprefixer'
-  run 'yarn add -D eslint prettier eslint-plugin-prettier eslint-config-prettier eslint-plugin-tailwindcss path vite-plugin-full-reload vite-plugin-stimulus-hmr'
-
-  # edit Vite config file
-  file = 'vite.config.ts'
-  File.open(file, 'w') do |f|
-    f.write 'import {defineConfig} from "vite"
-import FullReload from "vite-plugin-full-reload"
-import RubyPlugin from "vite-plugin-ruby"
-import StimulusHMR from "vite-plugin-stimulus-hmr"
-
-export default defineConfig({
-      clearScreen: false,
-      plugins: [
-          RubyPlugin(),
-          StimulusHMR(),
-          FullReload(["config/routes.rb", "app/views/**/*"], {delay: 300}),
-      ],
-
-    }
-)
-'
-  end
-
   # Tailwind Initialization
   run 'tailwind init'
 
-  # Modification of Tailwind Config file
+  # * Modification of Tailwind Config file
   file = 'tailwind.config.js'
   File.open(file, 'w') do |f|
     f.write '/** @type {import("tailwindcss").Config} */
@@ -276,7 +193,7 @@ module.exports = {
 '
   end
 
-  # Add SimpleForm Config to Tailwind to Gemfile
+  # * Add SimpleForm Config to Tailwind to Gemfile
   inject_into_file "Gemfile", before: "group :development, :test do" do
     <<~RUBY
       gem "tailwindcss-rails"
@@ -285,12 +202,12 @@ module.exports = {
     RUBY
   end
 
-  # run bundler
+  # * run bundler
   run 'bundle'
   run 'rails tailwindcss:install'
   run 'rails g simple_form:tailwind:install'
 
-   # Add Tailwind to application.css
+   # * Add Tailwind to application.css
   file = 'app/assets/stylesheets/application.css'
   File.open(file, 'w') do |f|
     f.write '@import "tailwindcss/base";
@@ -303,11 +220,65 @@ module.exports = {
     '
   end
 
-  # Create a file named application.css in app/javascript/entrypoints and add the following line:
+   # * Clean Tailwind CSS
+   run 'rm -f app/assets/builds/tailwind.css'
+   gsub_file('app/assets/config/manifest.js', '//= link_tree ../builds', '')
+   run 'rm -f app/assets/stylesheets/application.tailwind.css'
+   run 'rm -f config/tailwind.config.js'
+end
+
+def vite
+  # * Add Vite to Gemfile
+  inject_into_file "Gemfile", before: 'gem "jsbundling-rails' do
+    <<~RUBY
+      gem "vite_rails"
+      gem "vite_ruby"
+    RUBY
+  end
+
+  # * Remove ESBuild with yarn
+  run "yarn remove esbuild"
+
+  # * Remove "build" script from package json
+  gsub_file("package.json", '"build": "esbuild app/javascript/*.* --bundle --sourcemap --outdir=app/assets/builds --public-path=assets"', '')
+  # Remove JsBundlingRails Gem
+  gsub_file('Gemfile', 'gem "jsbundling-rails"', '')
+  gsub_file('Gemfile', '# Bundle and transpile JavaScript [https://github.com/rails/jsbundling-rails]', '')
+
+  # * run bundler
+  run 'bundle'
+  # run vite install
+  run 'bundle exec vite install'
+
+  # * Add dependencies/plugins
+  run 'yarn add -D eslint prettier eslint-plugin-prettier eslint-config-prettier eslint-plugin-tailwindcss path vite-plugin-full-reload vite-plugin-stimulus-hmr'
+
+  # * edit Vite config file
+  file = 'vite.config.ts'
+  File.open(file, 'w') do |f|
+    f.write 'import {defineConfig} from "vite"
+import FullReload from "vite-plugin-full-reload"
+import RubyPlugin from "vite-plugin-ruby"
+import StimulusHMR from "vite-plugin-stimulus-hmr"
+
+export default defineConfig({
+      clearScreen: false,
+      plugins: [
+          RubyPlugin(),
+          StimulusHMR(),
+          FullReload(["config/routes.rb", "app/views/**/*"], {delay: 300}),
+      ],
+
+    }
+)
+'
+  end
+
+  # * Create a file named application.css in app/javascript/entrypoints and add the following line:
   string = 'echo "@import \"../../assets/stylesheets/application.css\";" > app/javascript/entrypoints/application.css'
   run string
 
-  # Create a file names postcss.config.js and add the following lines:
+  # * Create a file names postcss.config.js and add the following lines:
   run 'touch postcss.config.js'
   file = 'postcss.config.js'
   File.open(file, 'w') do |f|
@@ -320,7 +291,7 @@ module.exports = {
     '
   end
 
-# Change Tags in application.html.erb to Vite Tags
+  # * Change Tags in application.html.erb to Vite Tags
   file = 'app/views/layouts/application.html.erb'
   File.open(file, 'w') do |f|
     f.write '<!DOCTYPE html>
@@ -346,14 +317,14 @@ module.exports = {
     '
   end
 
-# Change Procfile.dev configuration
+#  * Change Procfile.dev configuration
   file = 'Procfile.dev'
   File.open(file, 'w') do |f|
     f.write 'web: bin/rails server -p 3000
 vite: bin/vite dev --clobber'
   end
 
-# Build Home Template Layout
+# * Build Home Template Layout
 
 run 'rm app/views/pages/home.html.erb'
 file "app/views/pages/home.html.erb", <<~HTML
@@ -383,7 +354,7 @@ file "app/views/pages/home.html.erb", <<~HTML
 </div>
 HTML
 
-# Add Turbo & Stimus references on Entrypoint
+# * Add Turbo & Stimus references on Entrypoint
 
   inject_into_file "app/javascript/entrypoints/application.js", before: "// Example: Load Rails libraries in Vite." do
     <<~JS
@@ -391,20 +362,68 @@ HTML
       import "../controllers"
     JS
   end
+end
+
+## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
+## ! ## !  ## !   SCRIPT START HERE ## !  ## !  ## !
+## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
 
 
-  # Clean Tailwind CSS
-  run 'rm -f app/assets/builds/tailwind.css'
-  gsub_file('app/assets/config/manifest.js', '//= link_tree ../builds', '')
-  run 'rm -f app/assets/stylesheets/application.tailwind.css'
-  run 'rm -f config/tailwind.config.js'
+run "if uname | grep -q 'Darwin'; then pgrep spring | xargs kill -9; fi"
 
+# Install first Gems
+first_gems
+#handles layout
+layout
+#handles assets
+assets
 
+# Generators
+generators = <<~RUBY
+  config.generators do |generate|
+    generate.assets false
+    generate.helper false
+    generate.test_framework :test_unit, fixture: false
+  end
+RUBY
 
-# Git
+environment generators
+
 ########################################
-  git :init
-  git add: "."
-  git commit: "-m 'Initial commit with devise'"
+# After bundle
 
+after_bundle do
+  # Generators: db + simple form + pages controller
+  ########################################
+  rails_command "db:drop db:create db:migrate"
+  generate("simple_form:install")
+  generate(:controller, "pages", "home", "--skip-routes", "--no-test-framework")
+
+  # Routes
+  ########################################
+  route 'root to: "pages#home"'
+
+  # Install Devise
+  devise
+
+  # Environments
+  ########################################
+  environment 'config.action_mailer.default_url_options = { host: "http://localhost:3000" }', env: "development"
+  environment 'config.action_mailer.default_url_options = { host: "http://TODO_PUT_YOUR_DOMAIN_HERE" }', env: "production"
+
+  # Heroku
+  ########################################
+  run "bundle lock --add-platform x86_64-linux"
+
+  # Dotenv
+  ########################################
+  run "touch '.env'"
+
+  # Rubocop
+  ########################################
+  run "curl -L https://raw.githubusercontent.com/lewagon/rails-templates/master/.rubocop.yml > .rubocop.yml"
+
+  vite
+  tailwind_for_vite
+  git
 end
