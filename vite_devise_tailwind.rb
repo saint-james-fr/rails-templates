@@ -95,7 +95,7 @@ after_bundle do
   # Generators: db + simple form + pages controller
   ########################################
   rails_command "db:drop db:create db:migrate"
-  # generate("simple_form:install", "--bootstrap")
+  generate("simple_form:install")
   generate(:controller, "pages", "home", "--skip-routes", "--no-test-framework")
 
   # Routes
@@ -311,7 +311,7 @@ module.exports = {
   string = 'echo "@import \"../../assets/stylesheets/application.css\";" > app/javascript/entrypoints/application.css'
   run string
 
-  # create a file names postcss.config.js and add the following lines:
+  # Create a file names postcss.config.js and add the following lines:
   run 'touch postcss.config.js'
   file = 'postcss.config.js'
   File.open(file, 'w') do |f|
@@ -324,7 +324,7 @@ module.exports = {
     '
   end
 
-# Change Tags in application.html.erb
+# Change Tags in application.html.erb to Vite Tags
   file = 'app/views/layouts/application.html.erb'
   File.open(file, 'w') do |f|
     f.write '<!DOCTYPE html>
@@ -356,7 +356,8 @@ module.exports = {
 vite: bin/vite dev --clobber'
   end
 
-# Change HOME page
+# Build Home Template Layout
+
 run 'rm app/views/pages/home.html.erb'
 file "app/views/pages/home.html.erb", <<~HTML
 <div class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-gray-50 py-6 sm:py-12">
@@ -385,4 +386,12 @@ file "app/views/pages/home.html.erb", <<~HTML
 </div>
 HTML
 
+# Add Turbo & Stimus references into Entrypoint
+
+  inject_into_file "app/javascript/entrypoints/application.js", before: "// Example: Load Rails libraries in Vite." do
+    <<~JS
+      import "@hotwired/turbo-rails"
+      import "../controllers"
+    JS
+  end
 end
