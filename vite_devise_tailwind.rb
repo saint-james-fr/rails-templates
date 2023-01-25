@@ -1,6 +1,6 @@
-## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
-## ! ## !  ## !   FUNCTIONS ## !  ## !  ## ! ## ! ##
-## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
+              ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
+              ## ! ## !  ## !   FUNCTIONS ## !  ## !  ## ! ## ! ##
+              ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
 
 def first_gems
 
@@ -10,7 +10,6 @@ def first_gems
     <<~RUBY
       gem "devise"
       gem "autoprefixer-rails"
-      gem "font-awesome-sass", "~> 6.1"
       gem "simple_form", github: "heartcombo/simple_form"
     RUBY
   end
@@ -225,6 +224,7 @@ module.exports = {
    gsub_file('app/assets/config/manifest.js', '//= link_tree ../builds', '')
    run 'rm -f app/assets/stylesheets/application.tailwind.css'
    run 'rm -f config/tailwind.config.js'
+   gsub_file('Gemfile', 'gem "tailwindcss-rails"', '')
 end
 
 def vite
@@ -363,9 +363,15 @@ HTML
   end
 end
 
-## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
-## ! ## !  ## !   SCRIPT START HERE ## !  ## !  ## !
-## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
+
+
+
+
+
+
+              ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
+              ## ! ## !  ## !   SCRIPT START HERE ## !  ## !  ## !
+              ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !  ## !
 
 
 run "if uname | grep -q 'Darwin'; then pgrep spring | xargs kill -9; fi"
