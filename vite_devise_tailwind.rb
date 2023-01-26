@@ -224,7 +224,6 @@ module.exports = {
    gsub_file('app/assets/config/manifest.js', '//= link_tree ../builds', '')
    run 'rm -f app/assets/stylesheets/application.tailwind.css'
    run 'rm -f config/tailwind.config.js'
-   gsub_file('Gemfile', 'gem "tailwindcss-rails"', '')
 end
 
 def vite
