@@ -202,7 +202,6 @@ module.exports = {
 
   # * run bundler
   run 'bundle'
-  run 'rails tailwindcss:install'
   run 'rails g simple_form:tailwind:install'
 
    # * Add Tailwind to application.css
