@@ -280,6 +280,7 @@ export default defineConfig({
   File.open(file, 'w') do |f|
     f.write 'module.exports = {
       plugins: {
+        "tailwindcss/nesting": {},
         tailwindcss: {},
         autoprefixer: {},
       },
