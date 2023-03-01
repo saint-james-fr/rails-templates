@@ -379,7 +379,7 @@ first_gems
 #handles layout
 layout
 #handles assets
-assets
+#assets
 
 # Generators
 generators = <<~RUBY
